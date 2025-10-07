@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextjs-deployment
+  labels:
+    app: nextjs
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nextjs
+  template:
+    metadata:
+      labels:
+        app: nextjs
+    spec:
+      # If pulling from GHCR, reference imagePullSecrets (see README steps)
+      imagePullSecrets:
+        - name: ghcr-secret   # create this if using GHCR and private images
+      containers:
+        - name: nextjs
+          image: ghcr.io/<GH_OWNER>/<REPO>:latest   # replace with your image
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
